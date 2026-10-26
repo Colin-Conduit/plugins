@@ -1,0 +1,51 @@
+name: Sync upstream
+
+# Keeps this fork's main branch in sync with cursor/plugins.
+# Uses GitHub's merge-upstream API: fast-forward or merge commit, never a hard reset.
+
+on:
+  schedule:
+    - cron: "17 11 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-upstream
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: github.repository == 'Colin-Conduit/plugins'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Merge upstream into main
+        env:
+          # The default token cannot write files under .github/workflows.
+          GH_TOKEN: ${{ secrets.UPSTREAM_SYNC_TOKEN || github.token }}
+          HAS_PAT: ${{ secrets.UPSTREAM_SYNC_TOKEN != '' }}
+          BRANCH: main
+        run: |
+          set -uo pipefail
+          status=0
+          out=$(gh api --method POST "repos/${GITHUB_REPOSITORY}/merge-upstream" -f branch="${BRANCH}" 2>&1) || status=$?
+          echo "${out}"
+
+          if [ "${status}" -eq 0 ]; then
+            echo "Sync finished: $(jq -r '.message // "ok"' <<<"${out}" 2>/dev/null || echo ok)"
+            exit 0
+          fi
+
+          if grep -q "HTTP 409" <<<"${out}"; then
+            echo "::error::Upstream changes conflict with this fork, so nothing was merged. Open the repo on GitHub, use Sync fork, and resolve the conflict in a pull request. Then rerun this workflow."
+          elif grep -qi "workflow" <<<"${out}"; then
+            if [ "${HAS_PAT}" = "true" ]; then
+              echo "::error::Upstream changed files in .github/workflows and UPSTREAM_SYNC_TOKEN could not write them. Check the token has Workflows read/write on this repo and has not expired. Then rerun this workflow."
+            else
+              echo "::error::Upstream changed files in .github/workflows and the default token cannot write them. Add a fine-grained PAT with Contents and Workflows read/write as the UPSTREAM_SYNC_TOKEN repo secret. Then rerun this workflow."
+            fi
+          else
+            echo "::error::Sync failed (see the API response above). Check that UPSTREAM_SYNC_TOKEN is valid if it is set, then rerun this workflow."
+          fi
+          exit 1
