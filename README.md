@@ -117,6 +117,9 @@ Official Cursor plugins for popular developer tools, frameworks, and SaaS produc
 | `feishu` | [Feishu](third_party/feishu/) | Cursor | Integrations | Search, create, and update Feishu docs, and read Feishu messages and groups. |
 | `framer` | [Framer](third_party/framer/) | Cursor | Integrations | Design, build, and edit your Framer sites, pages, and CMS content. |
 | `vanta` | [Vanta](third_party/vanta/) | Cursor | Integrations | Query and remediate compliance tests, controls, frameworks, risks, and vulnerabilities in Vanta. |
+| `ringcentral-phone` | [RingCentral Phone](third_party/ringcentral-phone/) | Cursor | Integrations | Read call activity, AI call notes, SMS, voicemail, and fax, and send SMS. |
+| `ringcentral-chat` | [RingCentral Chat](third_party/ringcentral-chat/) | Cursor | Integrations | Read team chats and posts, send messages, and manage teams, tasks, and notes. |
+| `servicenow` | [ServiceNow](third_party/servicenow/) | Cursor | Integrations | Call the tools your admin publishes on a ServiceNow instance. |
 Author values match each plugin’s `plugin.json` `author.name` (Cursor lists `plugins@cursor.com` in the manifest).
 
 ## Repository structure
